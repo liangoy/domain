@@ -1,0 +1,279 @@
+swagger: '2.0'
+info:
+  title: domain
+  version: '0.1'
+consumes:
+  - application/json
+  - multipart/form-data
+produces:
+  - application/json
+paths:
+  /domains/register_status:
+    get:
+      tags:
+        - domains
+      operationId: handlers.register_status.get_register_status
+      summary: 域名是否被注册
+      parameters:
+        - name: domains
+          in: query
+          type: string
+          description: '域名,多个域名中间用'',''隔开'
+        - name: fast
+          in: query
+          type: boolean
+          default: true
+          description: '是否快速查询,快速查询是指从本地的记录读取域名是否被注册,可能会存在误差,但速度非常快,非快速查询是从注册局实时查询'
+        - name: store
+          in: query
+          type: boolean
+          default: false
+          description: '是否将非快速查询的结果储存进数据库,这个只有在fast模式下才能生效'
+      responses:
+        '200':
+          description: 'Return (damains,is_register)'
+          schema:
+            type: object
+            properties:
+              domain:
+                type: string
+                example: 10.com
+                description: 域名
+              update_time:
+                type: string
+                example: 1234567890
+                description: 10位数的时间戳,域名信息更新的时间,'0000000000'代表本地中没有信息
+              status:
+                type: string
+                example: 1
+                description: 域名的注册状态,0代表未被注册,1代表被注册
+    put:
+      tags:
+        - domains
+      operationId: handlers.register_status.put_register_status
+      summary: 设置域名是否注册
+      parameters:
+        - name: domains_and_status
+          in: body
+          schema:
+            type: array
+            items:
+              type: array
+              items:
+                type: string
+          description: '第一项是域名,第二项是状态,1代表被注册,0在表没有被注册 eg[["10.com","1"],["20.com","0"]]'
+      responses:
+        '200':
+          description: Return
+    delete:
+      tags:
+        - domains
+      operationId: handlers.register_status.delete_register_status
+      summary: 删除域名是否注册的信息
+      parameters:
+        - name: domains
+          in: query
+          type: string
+          description: '域名,多个域名中间用'',''隔开'
+      responses:
+        '200':
+          description: 'Return (damains,is_register)'
+
+  /contact_template:
+    get:
+      tags:
+        - contact_template
+      operationId: handlers.contact_template.get_contact_template
+      summary: 获取联系人模板
+      parameters:
+        - name: id
+          in: query
+          type: string
+          description: '联系人模板的id,多个id之间用","隔开'
+      responses:
+        200:
+          description: 联系人模板的信息
+
+    post:
+      tags:
+        - contact_template
+      summary: 增加联系人模板
+      operationId: handlers.contact_template.post_contact_template
+      parameters:
+        - name: id
+          required: true
+          in: formData
+          type: string
+          description: 代理商本地唯一模板ID
+        - name: type
+          in: formData
+          type: string
+          description: 域名所有者性质类型（E 企业、I 个人)
+        - name: id_type
+          required: true
+          in: formData
+          type: string
+          description: |
+            证件类型 (用于注册时，必填)
+            I: (SFZ 身份证、HZ 护照、JGZ 军官证、QT 其他)
+            E: (YYZZ)营业执照、ORG 组织机构代码证、 QT 其他)
+        - name: id_code
+          in: formData
+          type: string
+          description: 证件编号 (用于注册时，必填)
+        - name: cn_name
+          in: formData
+          required: true
+          type: string
+          description: 联系人中文姓名(产权信息)，2-20位字符
+        - name: cn_org
+          in: formData
+          type: string
+          description: 组织机构中文名称(产权信息，个人类型无需填写)，2-64位字符
+        - name: en_name
+          in: formData
+          required: true
+          type: string
+          description: 联系人英文姓名(产权信息)，2-64位字符
+        - name: en_org
+          in: formData
+          type: string
+          description: 组织机构英文名称(产权信息，个人类型无需填写)，2-64位字符
+        - name: voice
+          in: formData
+          required: true
+          type: string
+          description: 固定电话号码，0-17个字符，格式：国家代码|分区号|电话号码，如086|0592|23356572
+        - name: fax
+          in: formData
+          type: string
+          description: 传真号码，0-22个字符，格式：国家代码|分区号|电话号码，如086|0592|23356572
+        - name: mobile
+          in: formData
+          required: true
+          type: string
+          description: 手机号码，目前只支持中国区086手机号码，格式：国家代码|手机号，如086|18205989894
+        - name: email
+          in: formData
+          type: string
+          required: true
+          description: 电子邮箱地址，大于6位小于30位字符
+        - name: pc
+          in: formData
+          required: true
+          type: string
+          description: 邮政编码，6位数字
+        - name: province_id
+          in: formData
+          required: true
+          type: string
+          description: 省份 ID (可在 /agent/setting/provinces 中获取)
+        - name: city_id
+          in: formData
+          required: true
+          type: string
+          description: 城市 ID (可在 /agent/setting/cities 中获取)
+        - name: area_id
+          in: formData
+          type: string
+          description: 区域 ID (可在 /agent/setting/areas 中获取)
+        - name: cn_street
+          in: formData
+          required: true
+          type: string
+          description: 中文街道地址，小于64位字符
+        - name: en_street
+          in: formData
+          required: true
+          type: string
+          description: 英文街道地址，小于400位英文字符
+      responses:
+        200:
+          schema:
+            type: string
+            description: 被添加的模板的id
+          description: 成功新增模板
+        423:
+          description: 模板已经存在
+
+    delete:
+      tags:
+        - contact_template
+      operationId: handlers.contact_template.delete_contact_template
+      summary: 删除联系人模板
+      parameters:
+        - name: id
+          in: query
+          type: string
+          description: '联系人模板的id,多个id之间用","隔开'
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              type: string
+              description: 联系人的模板id
+          description: 以下这些id对应的模板信息已经不存在(成功删除了,或者原本就不存在)
+
+  /domains/our_domains:
+    post:
+      tags:
+        - our_domains
+      operationId: handlers.our_domains.post_our_domains
+      summary: 注册域名
+      parameters:
+        - name: domains
+          in: query
+          type: string
+          description: '要注册的域名,多个域名中间用","隔开'
+        - name: id
+          in: query
+          type: string
+          description: 联系人的模板id
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                domain:
+                  type: string
+                  description: 域名
+                status:
+                  type: string
+                  description: 注册状态,1是注册成功,2是注册中,3是域名已被注册,4是其他原因
+          description: 以下这些id对应的模板信息已经不存在(成功删除了,或者原本就不存在)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
