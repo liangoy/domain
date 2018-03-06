@@ -13,7 +13,7 @@ password = 'sqsm1234'
 def _get_headers(agent_id=agent_id, password=password, public_key=public_key):
     password_md5 = md5(password.encode()).hexdigest()
     timestamp = str(int(time.time()))
-    s = password_md5 + '.' + agent_id + '.' + public_key + '.' + timestamp
+    s = password_md5 + agent_id  + public_key+ timestamp
     signature = sha1(s.encode()).hexdigest()
     headers = {
         'Accept': 'application/json',
@@ -29,7 +29,7 @@ def get_domain_status(domains):
     info, cnt = [], 0
     while domains and cnt < 2:
         start_len = len(domains)
-        tasks = [grequests.get('http://dms.test.com/api/v1/agent/domain/check?keyword=' + i, headers=_get_headers(),
+        tasks = [grequests.get('http://dms.10.com/api/v1/agent/domain/check?keyword=' + i, headers=_get_headers(),
                                timeout=6) for i in domains]
         data = zip(domains, grequests.map(tasks))
         domains = []
@@ -48,8 +48,7 @@ def get_domain_status(domains):
 
 
 if __name__ == '__main__':
-    print(_get_headers())
-    print(requests.get('http://dms.10.com/api/v1/agent/domain/check?keyword=10.com', headers=_get_headers(),
-                       timeout=6).status_code)
-    print(requests.get('http://dms.10.com/api/v1/agent/domain/check?keyword=10.com', headers=_get_headers()).json())
-    print(get_domain_status('10.com,20.com,30.com'))
+    h=_get_headers()
+    print(h)
+    print(requests.get('http://dms.10.com/api/v1/agent/domain/check?keyword=liangoy1.com', headers=h).json())
+    #print(get_domain_status('10.com,20.com,30.com'))
